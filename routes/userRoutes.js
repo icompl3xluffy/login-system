@@ -5,7 +5,7 @@ import User from '../models/User.js';
 const router = express.Router();
 
 // For registration
-router.post('/', async (req, res) => {
+router.post('/register', async (req, res) => {
   try {
     const {username, email, password} = req.body;
 
@@ -17,7 +17,6 @@ router.post('/', async (req, res) => {
      const user = await User.create(req.body)
     res.status(201).json({_id: user._id, username: user.username, email: user.email,});
 
-
   } catch (err) {
      res.status(500).json({ error: err.message });
   }
@@ -26,8 +25,19 @@ router.post('/', async (req, res) => {
 
 
 // For Login
-router.post('/', async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Incorrect email or password.' });
+    }
+    
+    const correct = await user.isCorrectPassword(password);
+    if (!correct) {
+      return res.status(400).json({ message: 'Incorrect email or password.' });
+    }
     
   } catch (err) {
      res.status(500).json({ error: err.message });
